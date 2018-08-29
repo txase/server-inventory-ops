@@ -1,3 +1,429 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: Stackery Serverless API Example Stack
+Metadata:
+  StackeryEnvConfigParameters:
+    StackeryEnvConfigdbrootPasswordAsString: db.rootPassword
+Resources:
+  virtualNetwork82F1A2BA:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - Stackery Stack ${StackeryStackTagName} Environment ${StackeryEnvironmentTagName} Virtual Network ${ResourceName}
+            - ResourceName: virtualNetwork82F1A2BA
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  virtualNetwork82F1A2BAPrivateSubnet1:
+    Metadata:
+      StackeryManaged: true
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - 0
+        - !GetAZs ''
+      CidrBlock: !Select
+        - 0
+        - !Cidr
+          - 10.0.0.0/16
+          - 4
+          - 14
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - Stackery Stack ${StackeryStackTagName} Environment ${StackeryEnvironmentTagName} Virtual Network ${ResourceName} Private Subnet 1
+            - ResourceName: virtualNetwork82F1A2BA
+      VpcId: !Ref virtualNetwork82F1A2BA
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  virtualNetwork82F1A2BAPrivateSubnet2:
+    Metadata:
+      StackeryManaged: true
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - 1
+        - !GetAZs ''
+      CidrBlock: !Select
+        - 1
+        - !Cidr
+          - 10.0.0.0/16
+          - 4
+          - 14
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - Stackery Stack ${StackeryStackTagName} Environment ${StackeryEnvironmentTagName} Virtual Network ${ResourceName} Private Subnet 2
+            - ResourceName: virtualNetwork82F1A2BA
+      VpcId: !Ref virtualNetwork82F1A2BA
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  virtualNetwork82F1A2BAPublicSubnet1:
+    Metadata:
+      StackeryManaged: true
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - 0
+        - !GetAZs ''
+      CidrBlock: !Select
+        - 2
+        - !Cidr
+          - 10.0.0.0/16
+          - 4
+          - 14
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - Stackery Stack ${StackeryStackTagName} Environment ${StackeryEnvironmentTagName} Virtual Network ${ResourceName} Public Subnet 1
+            - ResourceName: virtualNetwork82F1A2BA
+      VpcId: !Ref virtualNetwork82F1A2BA
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  virtualNetwork82F1A2BAPublicSubnet2:
+    Metadata:
+      StackeryManaged: true
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - 1
+        - !GetAZs ''
+      CidrBlock: !Select
+        - 3
+        - !Cidr
+          - 10.0.0.0/16
+          - 4
+          - 14
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - Stackery Stack ${StackeryStackTagName} Environment ${StackeryEnvironmentTagName} Virtual Network ${ResourceName} Public Subnet 2
+            - ResourceName: virtualNetwork82F1A2BA
+      VpcId: !Ref virtualNetwork82F1A2BA
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  virtualNetwork82F1A2BAPrivateSubnet1NatGatewayEIP:
+    Metadata:
+      StackeryManaged: true
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  virtualNetwork82F1A2BAPrivateSubnet1NatGateway:
+    Metadata:
+      StackeryManaged: true
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt virtualNetwork82F1A2BAPrivateSubnet1NatGatewayEIP.AllocationId
+      SubnetId: !Ref virtualNetwork82F1A2BAPublicSubnet1
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  virtualNetwork82F1A2BAPrivateSubnet1RouteTable:
+    Metadata:
+      StackeryManaged: true
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - Stackery Stack ${StackeryStackTagName} Environment ${StackeryEnvironmentTagName} Virtual Network ${ResourceName} Private Subnet 1 Route Table
+            - ResourceName: virtualNetwork82F1A2BA
+      VpcId: !Ref virtualNetwork82F1A2BA
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  virtualNetwork82F1A2BAPrivateSubnet1NatGatewayRoute:
+    Metadata:
+      StackeryManaged: true
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref virtualNetwork82F1A2BAPrivateSubnet1NatGateway
+      RouteTableId: !Ref virtualNetwork82F1A2BAPrivateSubnet1RouteTable
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  virtualNetwork82F1A2BAPrivateSubnet1RouteTableAssociation:
+    Metadata:
+      StackeryManaged: true
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref virtualNetwork82F1A2BAPrivateSubnet1RouteTable
+      SubnetId: !Ref virtualNetwork82F1A2BAPrivateSubnet1
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  virtualNetwork82F1A2BAPrivateSubnet2NatGatewayEIP:
+    Metadata:
+      StackeryManaged: true
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  virtualNetwork82F1A2BAPrivateSubnet2NatGateway:
+    Metadata:
+      StackeryManaged: true
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt virtualNetwork82F1A2BAPrivateSubnet2NatGatewayEIP.AllocationId
+      SubnetId: !Ref virtualNetwork82F1A2BAPublicSubnet2
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  virtualNetwork82F1A2BAPrivateSubnet2RouteTable:
+    Metadata:
+      StackeryManaged: true
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - Stackery Stack ${StackeryStackTagName} Environment ${StackeryEnvironmentTagName} Virtual Network ${ResourceName} Private Subnet 2 Route Table
+            - ResourceName: virtualNetwork82F1A2BA
+      VpcId: !Ref virtualNetwork82F1A2BA
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  virtualNetwork82F1A2BAPrivateSubnet2NatGatewayRoute:
+    Metadata:
+      StackeryManaged: true
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref virtualNetwork82F1A2BAPrivateSubnet2NatGateway
+      RouteTableId: !Ref virtualNetwork82F1A2BAPrivateSubnet2RouteTable
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  virtualNetwork82F1A2BAPrivateSubnet2RouteTableAssociation:
+    Metadata:
+      StackeryManaged: true
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref virtualNetwork82F1A2BAPrivateSubnet2RouteTable
+      SubnetId: !Ref virtualNetwork82F1A2BAPrivateSubnet2
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  virtualNetwork82F1A2BAPublicSubnetsInternetGateway:
+    Metadata:
+      StackeryManaged: true
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - Stackery Stack ${StackeryStackTagName} Environment ${StackeryEnvironmentTagName} Virtual Network ${ResourceName} Public Subnets Internet Gateway
+            - ResourceName: virtualNetwork82F1A2BA
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  virtualNetwork82F1A2BAPublicSubnetsInternetGatewayAttachment:
+    Metadata:
+      StackeryManaged: true
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref virtualNetwork82F1A2BAPublicSubnetsInternetGateway
+      VpcId: !Ref virtualNetwork82F1A2BA
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  virtualNetwork82F1A2BAPublicSubnetsRouteTable:
+    Metadata:
+      StackeryManaged: true
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - Stackery Stack ${StackeryStackTagName} Environment ${StackeryEnvironmentTagName} Virtual Network ${ResourceName} Public Subnets Route Table
+            - ResourceName: virtualNetwork82F1A2BA
+      VpcId: !Ref virtualNetwork82F1A2BA
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  virtualNetwork82F1A2BAPublicSubnetsInternetGatewayRoute:
+    Metadata:
+      StackeryManaged: true
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref virtualNetwork82F1A2BAPublicSubnetsInternetGateway
+      RouteTableId: !Ref virtualNetwork82F1A2BAPublicSubnetsRouteTable
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  virtualNetwork82F1A2BAPublicSubnet1RouteTableAssociation:
+    Metadata:
+      StackeryManaged: true
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref virtualNetwork82F1A2BAPublicSubnetsRouteTable
+      SubnetId: !Ref virtualNetwork82F1A2BAPublicSubnet1
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  virtualNetwork82F1A2BAPublicSubnet2RouteTableAssociation:
+    Metadata:
+      StackeryManaged: true
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref virtualNetwork82F1A2BAPublicSubnetsRouteTable
+      SubnetId: !Ref virtualNetwork82F1A2BAPublicSubnet2
+    Condition: virtualNetwork82F1A2BACreateNewResource
+  database2BAED439:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: '5'
+      AllowMajorVersionUpgrade: true
+      AutoMinorVersionUpgrade: true
+      BackupRetentionPeriod: '0'
+      CopyTagsToSnapshot: true
+      DBInstanceClass: db.t2.micro
+      DBSubnetGroupName: !Ref database2BAED439SubnetGroup
+      Engine: mariadb
+      EngineVersion: '10.2'
+      MasterUsername: root
+      MasterUserPassword: !Ref StackeryEnvConfigdbrootPasswordAsString
+      MultiAZ: false
+      PubliclyAccessible: false
+      StorageType: gp2
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - Stackery Stack ${StackeryStackTagName} Environment ${StackeryEnvironmentTagName} Database ${ResourceName}
+            - ResourceName: database2BAED439
+      VPCSecurityGroups:
+        - !Ref database2BAED439SecurityGroup
+    Condition: database2BAED439CreateNewResource
+  database2BAED439SubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: !Sub
+        - Stackery Stack ${StackeryStackTagName} Environment ${StackeryEnvironmentTagName} Database ${ResourceName} VPC Subnets
+        - ResourceName: database2BAED439
+      SubnetIds:
+        - !If
+          - virtualNetwork82F1A2BAUseExistingResource
+          - !GetAtt virtualNetwork82F1A2BAExistingResource.PrivateSubnet1
+          - !Ref virtualNetwork82F1A2BAPrivateSubnet1
+        - !If
+          - virtualNetwork82F1A2BAUseExistingResource
+          - !GetAtt virtualNetwork82F1A2BAExistingResource.PrivateSubnet2
+          - !Ref virtualNetwork82F1A2BAPrivateSubnet2
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - Stackery Stack ${StackeryStackTagName} Environment ${StackeryEnvironmentTagName} Database ${ResourceName} VPC Subnets
+            - ResourceName: database2BAED439
+    Condition: database2BAED439CreateNewResource
+  database2BAED439SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Database Security Group
+      SecurityGroupIngress:
+        CidrIp: 0.0.0.0/0
+        FromPort: 3306
+        IpProtocol: tcp
+        ToPort: 3306
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - Stackery Stack ${StackeryStackTagName} Environment ${StackeryEnvironmentTagName} Database ${ResourceName} VPC Security Group
+            - ResourceName: database2BAED439
+      VpcId: !If
+        - virtualNetwork82F1A2BAUseExistingResource
+        - !Ref virtualNetwork82F1A2BAExistingResource
+        - !Ref virtualNetwork82F1A2BA
+    Condition: database2BAED439CreateNewResource
+  functionD5431A87:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-functionD5431A87
+      Description: !Sub
+        - Stackery Stack ${StackeryStackTagName} Environment ${StackeryEnvironmentTagName} Function ${ResourceName}
+        - ResourceName: functionD5431A87
+      CodeUri: src/functionD5431A87
+      Handler: index.handler
+      Runtime: nodejs8.10
+      MemorySize: 3008
+      Timeout: 30
+      Tracing: Active
+      Policies:
+        - AWSXrayWriteOnlyAccess
+        - AWSLambdaENIManagementAccess
+      VpcConfig:
+        SecurityGroupIds:
+          - !If
+            - virtualNetwork82F1A2BAUseExistingResource
+            - !GetAtt virtualNetwork82F1A2BAExistingResource.DefaultSecurityGroup
+            - !GetAtt virtualNetwork82F1A2BA.DefaultSecurityGroup
+        SubnetIds:
+          - !If
+            - virtualNetwork82F1A2BAUseExistingResource
+            - !GetAtt virtualNetwork82F1A2BAExistingResource.PrivateSubnet1
+            - !Ref virtualNetwork82F1A2BAPrivateSubnet1
+          - !If
+            - virtualNetwork82F1A2BAUseExistingResource
+            - !GetAtt virtualNetwork82F1A2BAExistingResource.PrivateSubnet2
+            - !Ref virtualNetwork82F1A2BAPrivateSubnet2
+      Environment:
+        Variables:
+          DB_INSTANCE: !If
+            - database2BAED439UseExistingResource
+            - !Ref database2BAED439ExistingResource
+            - !Ref database2BAED439
+          DB_ADDRESS: !If
+            - database2BAED439UseExistingResource
+            - !GetAtt database2BAED439ExistingResource.Endpoint.Address
+            - !GetAtt database2BAED439.Endpoint.Address
+          DB_PORT: !If
+            - database2BAED439UseExistingResource
+            - !GetAtt database2BAED439ExistingResource.Endpoint.Port
+            - !GetAtt database2BAED439.Endpoint.Port
+          DB_ARN: !Sub arn:aws:rds:${AWS::Region}:${AWS::AccountId}:db:${database2BAED439}
+      Events:
+        apiC7A7A73F:
+          Type: Api
+          Properties:
+            Path: /
+            Method: GET
+            RestApiId: !Ref apiC7A7A73F
+  apiC7A7A73F:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub
+        - ${ResourceName} From Stackery Stack ${StackeryStackTagName} Environment ${StackeryEnvironmentTagName}
+        - ResourceName: apiC7A7A73F
+      StageName: !Ref StackeryEnvironmentAPIGatewayStageName
+      DefinitionBody:
+        swagger: '2.0'
+        info: {}
+        paths:
+          /:
+            get:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${functionD5431A87.Arn}/invocations
+              responses: {}
+      EndpointConfiguration: REGIONAL
+  virtualNetwork82F1A2BAExistingResource:
+    Type: Custom::StackeryExistingResource
+    Properties:
+      ServiceToken: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:stackery-agent-commander
+      Type: virtualNetwork
+      Data:
+        VpcId: vpc-0726a036a6bc71159
+        DefaultPublicSubnetIds:
+          - vpc-0726a036a6bc71159
+          - vpc-0726a036a6bc71159
+        DefaultPrivateSubnetIds:
+          - vpc-0726a036a6bc71159
+          - vpc-0726a036a6bc71159
+    Condition: virtualNetwork82F1A2BAUseExistingResource
+  database2BAED439ExistingResource:
+    Type: Custom::StackeryExistingResource
+    Properties:
+      ServiceToken: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:stackery-agent-commander
+      Type: database
+      Data: arn:aws:rds:us-east-1:629241195457:db:sdv50mjj7uzf5w
+    Condition: database2BAED439UseExistingResource
+Parameters:
+  StackeryStackTagName:
+    Type: String
+    Description: Stack Name (injected by Stackery at deployment time)
+  StackeryEnvironmentTagName:
+    Type: String
+    Description: Environment Name (injected by Stackery at deployment time)
+  StackeryEnvironmentAPIGatewayStageName:
+    Type: String
+    Description: Environment name used for API Gateway Stage names (injected by Stackery at deployment time)
+  StackeryEnvConfigdbrootPasswordAsString:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /Stackery/Environments/<StackeryEnvId>/Config/db/rootPassword
+Conditions:
+  virtualNetwork82F1A2BACreateNewResource: !Equals
+    - 'false'
+    - 'true'
+  virtualNetwork82F1A2BAUseExistingResource: !Not
+    - Condition: virtualNetwork82F1A2BACreateNewResource
+  database2BAED439CreateNewResource: !Equals
+    - 'false'
+    - 'true'
+  database2BAED439UseExistingResource: !Not
+    - Condition: database2BAED439CreateNewResource
